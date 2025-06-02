@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # ==========================
-# Pop!_OS User Directory Cleaner
+# Pop!_OS Safe User Cleaner
 # ==========================
-# Safely deletes all files and folders in Desktop, Documents, Downloads, Music, Pictures, and Videos.
-# Keeps system/config files untouched and preserves this script itself.
+# Permanently clears user files from common folders while:
+# - Skipping this script itself
+# - Avoiding all .sh files in ~/Desktop
+# - Preserving hidden/system files in ~
 # ==========================
 
 set -euo pipefail
@@ -15,52 +17,63 @@ SCRIPT_PATH="$(realpath "$0")"
 # Directories to clear (relative to home)
 TARGET_DIRS=("Desktop" "Documents" "Downloads" "Music" "Pictures" "Videos")
 
-# Resolve absolute home directory path
+# Resolve absolute home directory
 USER_HOME="$HOME"
 
 # Confirm with user
-echo "⚠️  This will permanently DELETE all contents in the following directories:"
+echo "⚠️  This will permanently DELETE all contents in:"
 for dir in "${TARGET_DIRS[@]}"; do
     echo "   - ${USER_HOME}/${dir}"
 done
-echo "❗ This action is irreversible. The script itself will be preserved."
-
-read -p "Are you absolutely sure? Type 'yes' to proceed: " confirm
+echo "🛡️  All .sh files in Desktop will be preserved."
+echo "🛡️  This script will be preserved."
+read -p "Type 'yes' to proceed: " confirm
 if [[ "$confirm" != "yes" ]]; then
-    echo "❌ Operation cancelled."
+    echo "❌ Cancelled."
     exit 1
 fi
 
-# Function to clear a directory, skipping the script itself
+# Function to clear a directory
 clear_dir() {
     local dir_path="$1"
-    if [[ -d "$dir_path" ]]; then
-        echo "🧹 Clearing: $dir_path"
+    local dir_name="$(basename "$dir_path")"
 
-        # Iterate over files and folders in the directory
+    if [[ -d "$dir_path" ]]; then
+        echo "🧹 Cleaning $dir_path..."
+
         shopt -s dotglob nullglob
         for item in "$dir_path"/* "$dir_path"/.*; do
+            base_item="$(basename "$item")"
+
             # Skip . and ..
-            [[ "$(basename "$item")" == "." || "$(basename "$item")" == ".." ]] && continue
+            [[ "$base_item" == "." || "$base_item" == ".." ]] && continue
+
             # Skip the script itself
             [[ "$item" == "$SCRIPT_PATH" ]] && continue
 
+            # Skip .sh files ONLY in Desktop
+            if [[ "$dir_name" == "Desktop" && "$item" == *.sh ]]; then
+                echo "⚠️  Skipping script: $item"
+                continue
+            fi
+
+            # Delete item
             rm -rf -- "$item"
         done
         shopt -u dotglob nullglob
 
-        echo "✅ Cleared: $dir_path"
+        echo "✅ Done: $dir_path"
     else
-        echo "⚠️  Directory not found: $dir_path"
+        echo "⚠️  Skipping missing directory: $dir_path"
     fi
 }
 
-# Perform cleaning
+# Execute
 for dir in "${TARGET_DIRS[@]}"; do
     clear_dir "${USER_HOME}/${dir}"
 done
 
-echo "🎉 All user directories cleaned successfully, and script preserved."
+echo "🎉 Cleanup complete. Script and .sh files on Desktop were preserved."
 
 # Now Clearing Passwords...\
 echo "Now Clearing passwords... "
