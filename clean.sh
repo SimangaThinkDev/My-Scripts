@@ -76,16 +76,6 @@ done
 
 echo "🎉 Cleanup complete. Script and .sh files on Desktop were preserved."
 
----
-
-## Deleting SSH Keys
-
-To remove SSH keys, you'll need to target the **`.ssh`** directory within the user's home folder. This hidden folder is where SSH keys, known hosts, and other related configuration files are stored. Deleting this directory effectively removes all SSH-related access from the machine.
-
-Below is the code that you should add to the script after the `echo "Now Clearing passwords... "` line.
-
-```bash
-# Code to delete SSH keys
 SSH_DIR="${USER_HOME}/.ssh"
 
 echo "🔐 This will also PERMANENTLY delete ALL existing SSH keys and configurations."
