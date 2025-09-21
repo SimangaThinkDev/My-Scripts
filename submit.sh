@@ -7,6 +7,7 @@
 # - Skipping this script itself
 # - Avoiding all .sh files in ~/Desktop
 # - Preserving hidden/system files in ~
+# - Removing SSH keys
 # ==========================
 
 set -euo pipefail
@@ -21,12 +22,12 @@ TARGET_DIRS=("Desktop" "Documents" "Downloads" "Music" "Pictures" "Videos")
 USER_HOME="$HOME"
 
 # Confirm with user
-echo "⚠️  This will permanently DELETE all contents in:"
+echo "⚠️  This will permanently DELETE all contents in:"
 for dir in "${TARGET_DIRS[@]}"; do
-    echo "   - ${USER_HOME}/${dir}"
+    echo "   - ${USER_HOME}/${dir}"
 done
-echo "🛡️  All .sh files in Desktop will be preserved."
-echo "🛡️  This script will be preserved."
+echo "🛡️  All .sh files in Desktop will be preserved."
+echo "🛡️  This script will be preserved."
 read -p "Type 'yes' to proceed: " confirm
 if [[ "$confirm" != "yes" ]]; then
     echo "❌ Cancelled."
@@ -53,7 +54,7 @@ clear_dir() {
 
             # Skip .sh files ONLY in Desktop
             if [[ "$dir_name" == "Desktop" && "$item" == *.sh ]]; then
-                echo "⚠️  Skipping script: $item"
+                echo "⚠️  Skipping script: $item"
                 continue
             fi
 
@@ -64,7 +65,7 @@ clear_dir() {
 
         echo "✅ Done: $dir_path"
     else
-        echo "⚠️  Skipping missing directory: $dir_path"
+        echo "⚠️  Skipping missing directory: $dir_path"
     fi
 }
 
@@ -75,8 +76,30 @@ done
 
 echo "🎉 Cleanup complete. Script and .sh files on Desktop were preserved."
 
-# Now Clearing Passwords...\
-echo "Now Clearing passwords... "
+---
 
-# Code here////
+## Deleting SSH Keys
 
+To remove SSH keys, you'll need to target the **`.ssh`** directory within the user's home folder. This hidden folder is where SSH keys, known hosts, and other related configuration files are stored. Deleting this directory effectively removes all SSH-related access from the machine.
+
+Below is the code that you should add to the script after the `echo "Now Clearing passwords... "` line.
+
+```bash
+# Code to delete SSH keys
+SSH_DIR="${USER_HOME}/.ssh"
+
+echo "🔐 This will also PERMANENTLY delete ALL existing SSH keys and configurations."
+read -p "Are you sure you want to delete SSH keys? Type 'yes' to proceed: " confirm_ssh_keys
+if [[ "$confirm_ssh_keys" != "yes" ]]; then
+    echo "❌ Skipping SSH key deletion."
+else
+    if [[ -d "$SSH_DIR" ]]; then
+        echo "💥 Deleting SSH directory: $SSH_DIR..."
+        rm -rf -- "$SSH_DIR"
+        echo "✅ SSH keys deleted."
+    else
+        echo "⚠️  .ssh directory not found. Skipping."
+    fi
+fi
+
+echo "🚀 All requested cleanup tasks are complete!"
