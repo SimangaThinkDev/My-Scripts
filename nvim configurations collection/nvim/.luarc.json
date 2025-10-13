@@ -1,0 +1,19 @@
+{
+    "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+    "diagnostics.globals": [
+        "vim"
+    ],
+    "runtime.path": [
+        "lua/?.lua",
+        "lua/?/init.lua"
+    ],
+    "runtime.version": "LuaJIT",
+    "workspace.library": [
+        "${env:VIMRUNTIME}",
+        "~/.local/share/nvim/lazy/lazy.nvim/",
+        "~/.local/share/nvim/lazy/nvim-lspconfig/",
+        "~/.local/share/nvim/lazy/conform.nvim/",
+        "~/.local/share/nvim/lazy/toggleterm.nvim/lua",
+        "~/.local/share/nvim/lazy/fzf-lua/lua"
+    ]
+}
